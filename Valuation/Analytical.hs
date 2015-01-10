@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveDataTypeable #-}
 {-# OPTIONS_GHC -XFlexibleInstances #-}
+{-# LANGUAGE ExistentialQuantification #-}
 
 
 --------------------------------------------------------------------------
@@ -7,8 +8,9 @@
 --------------------------------------------------------------------------
 module Valuation.Analytical  
     ( 
-     Valuable, value, valueGreeks,
-     ValueGreeksStorage (..), ValueStorage (..)
+     AnalyticValuable, valueA, valueAGreeks,
+     PayOff, evalPO, Model, integrate,
+     ValuationInfo (..)
     ) where
 
 --------------------------------------------------------------------------
@@ -16,14 +18,20 @@ module Valuation.Analytical
 --------------------------------------------------------------------------
 import Utils.MyJSON
 import Utils.MyUtils
-
+import Valuation
 --------------------------------------------------------------------------
 ------------------------------- Classes ----------------------------------
 --------------------------------------------------------------------------
 
-class Valuable a where
-    value       :: a -> Result_ ValueStorage
-    valueGreeks :: a -> Result_ ValueGreeksStorage
+class AnalyticValuable a where
+    valueA       :: a -> Result_ ValueStorage
+    valueAGreeks :: a -> Result_ ValueStorage
+--------------------------------------------------------------------------
+class PayOff p where
+    evalPO :: p -> Double -> Double
+--------------------------------------------------------------------------
+class Model m where
+    integrate :: PayOff p => m -> p -> Double 
 --------------------------------------------------------------------------
 -------------------------------- Alias -----------------------------------
 --------------------------------------------------------------------------
@@ -31,15 +39,7 @@ class Valuable a where
 --------------------------------------------------------------------------
 ------------------------------- Data -------------------------------------
 --------------------------------------------------------------------------
-data ValueGreeksStorage = ValueGreeksStorage {
-                                                 vgsValue :: Double, 
-                                                 vgsGreeks :: [Double], 
-                                                 vgsSubValues :: [ValueGreeksStorage]
-                                             } deriving (Eq, Show, Data, Typeable)
---------------------------------------------------------------------------
-data ValueStorage = ValueStorage {
-                                     vsValue :: Double, 
-                                     vsSubValues :: [ValueStorage]
-                                 } deriving (Eq, Show, Data, Typeable)
-
-
+data ValuationInfo m p = ValuationInfo {
+                                           viModel :: m,
+                                           viPayOff :: p
+                                       }

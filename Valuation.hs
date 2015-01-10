@@ -8,7 +8,6 @@
 module Valuation
     ( 
      Valuable, value, valueGreeks,
-     AnalyticValuable, valueA, valueAGreeks,
      Engine (..), ValueStorage (..)
     ) where
 
@@ -16,20 +15,15 @@ module Valuation
 ------------------------------- Imports ----------------------------------
 --------------------------------------------------------------------------
 import Utils.MyJSON
-import Utils.MyUtils
-import Valuation.MktData  
+import Utils.MyUtils  
 --------------------------------------------------------------------------
 ------------------------------- Classes ----------------------------------
 --------------------------------------------------------------------------
 
 class Valuable a where
-    value       :: MktData -> a -> Result_ ValueStorage
-    valueGreeks :: MktData -> a -> Result_ ValueStorage
---------------------------------------------------------------------------
-
-class AnalyticValuable a where
-    valueA       :: MktData -> a -> Result_ ValueStorage
-    valueAGreeks :: MktData -> a -> Result_ ValueStorage
+    value       :: a -> Result_ ValueStorage
+    valueGreeks :: a -> Result_ ValueStorage
+    
 --------------------------------------------------------------------------
 -------------------------------- Alias -----------------------------------
 --------------------------------------------------------------------------
@@ -37,7 +31,8 @@ class AnalyticValuable a where
 --------------------------------------------------------------------------
 ------------------------------- Data -------------------------------------
 --------------------------------------------------------------------------
-data Engine = Analytical | MonteCarlo | Tree | PDE
+data Engine = Analytical | MonteCarlo | Tree | PDE 
+              deriving (Eq, Show, Data, Typeable) 
 --------------------------------------------------------------------------
 data ValueStorage = ValueStorage {
                                      vsValue :: Double, 
